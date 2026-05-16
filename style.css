@@ -1,0 +1,27 @@
+html { scroll-behavior: smooth; }
+.step-transition { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+@keyframes pulse-red {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+.recording-active {
+    animation: pulse-red 1s infinite;
+    color: #ef4444 !important;
+}
+
+input, select, textarea {
+    font-size: 16px !important; /* Evita zoom automático no iOS */
+}
+
+.step-dot {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-content {
+    animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
