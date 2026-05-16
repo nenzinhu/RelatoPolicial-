@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PMRv - Posto 19</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pmrv: '#1a237e',
+                        whatsapp: '#25d366'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        .step-transition { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; }
+        @keyframes pulse-red {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .recording-active {
+            animation: pulse-red 1s infinite;
+            color: #ef4444 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased font-sans pb-10">
+
+    <header class="bg-pmrv text-white p-4 sticky top-0 z-50 shadow-md">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <h1 class="text-lg font-bold tracking-wide uppercase">PMRv - Posto 19</h1>
+            <span id="offline-indicator" class="hidden bg-red-500 text-xs px-2 py-1 rounded font-bold uppercase">Offline</span>
+        </div>
+    </header>
+
+    <!-- Stepper Indicator -->
+    <div class="max-w-xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between relative">
+            <div class="absolute left-0 top-1/2 w-full h-1 bg-gray-300 -translate-y-1/2 z-0"></div>
+            <div id="stepper-progress" class="absolute left-0 top-1/2 w-0 h-1 bg-pmrv -translate-y-1/2 z-0 transition-all duration-300"></div>
+            
+            <div class="step-dot z-10 w-8 h-8 rounded-full bg-pmrv text-white flex items-center justify-center font-bold text-sm shadow-md" data-step="1">1</div>
+            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="2">2</div>
+            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="3">3</div>
+            <div id="dot-vitimas" class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm hidden" data-step="4">4</div>
+            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="5">✓</div>
+        </div>
+    </div>
+
+    <main id="wizard-container" class="max-w-xl mx-auto p-4 relative overflow-hidden">
+
+        <!-- Passo 1: Identificação -->
+        <section id="step-1" class="step-content bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <h2 class="text-xl font-bold text-pmrv mb-4 border-b pb-2">1. Identificação</h2>
+            <div>
+                <label for="pmrv_sade" class="block text-sm font-semibold text-gray-700 mb-1">Protocolo SADE</label>
+                <input type="text" id="pmrv_sade" placeholder="Ex: 1234567" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition">
+            </div>
+            <div>
+                <label for="pmrv_vtr" class="block text-sm font-semibold text-gray-700 mb-1">Viatura (PM-XXXX)</label>
+                <input type="text" id="pmrv_vtr" placeholder="Ex: 1234" oninput="pmrv_validarVtr(this)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition text-lg font-bold tracking-widest uppercase">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Hora do Sinistro</label>
+                <div class="flex gap-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="pmrv_hora_tipo" id="pmrv_hora_auto" checked onclick="pmrv_atualizar()" class="w-4 h-4 text-pmrv focus:ring-pmrv">
+                        <span class="text-sm">Automática (Agora)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="pmrv_hora_tipo" id="pmrv_hora_manual" onclick="pmrv_atualizar()" class="w-4 h-4 text-pmrv focus:ring-pmrv">
+                        <span class="text-sm">Manual</span>
+                    </label>
+                </div>
+                <input type="time" id="pmrv_input_hora" class="hidden w-full p-3 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition" oninput="pmrv_atualizar()">
+            </div>
+            <div>
+                <label for="pmrv_conhecimento" class="block text-sm font-semibold text-gray-700 mb-1">Conhecimento da Ocorrência</label>
+                <select id="pmrv_conhecimento" onchange="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition bg-white">
+                    <option value="pela Central">Pela Central</option>
+                    <option value="por populares">Por Populares</option>
+                    <option value="pela guarnição">Pela Guarnição</option>
+                </select>
+            </div>
+            <button onclick="nextStep()" class="w-full bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition flex items-center justify-center gap-2">
+                SEGUINTE
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </section>
+
+        <!-- Passo 2: Localização -->
+        <section id="step-2" class="step-content hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <h2 class="text-xl font-bold text-pmrv mb-4 border-b pb-2">2. Localização</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="pmrv_rodovia" class="block text-sm font-semibold text-gray-700 mb-1">Rodovia</label>
+                    <select id="pmrv_rodovia" onchange="pmrv_verificarRodovia()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition bg-white font-bold">
+                        <option value="SC-401">SC-401</option>
+                        <option value="SC-400">SC-400</option>
+                        <option value="SC-402">SC-402</option>
+                        <option value="SC-403">SC-403</option>
+                        <option value="SC-404">SC-404</option>
+                        <option value="SC-405">SC-405</option>
+                        <option value="SC-406">SC-406</option>
+                        <option value="SC-281">SC-281</option>
+                        <option value="SC-407">SC-407</option>
+                        <option value="SC-408">SC-408</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="pmrv_km" class="block text-sm font-semibold text-gray-700 mb-1">KM</label>
+                    <input type="number" id="pmrv_km" step="0.1" placeholder="Ex: 12.5" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition text-center font-bold">
+                </div>
+            </div>
+            <div>
+                <label for="pmrv_cidade" class="block text-sm font-semibold text-gray-700 mb-1">Cidade</label>
+                <input type="text" id="pmrv_cidade" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-gray-50">
+                <select id="pmrv_cidade_407" class="hidden w-full p-3 mt-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-blue-50" onchange="pmrv_selecionarCidade407()">
+                    <option value="Biguaçu/SC">Biguaçu/SC</option>
+                    <option value="Antônio Carlos/SC">Antônio Carlos/SC</option>
+                </select>
+                <select id="pmrv_cidade_281" class="hidden w-full p-3 mt-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-blue-50" onchange="pmrv_selecionarCidade281()">
+                    <option value="São José/SC">São José/SC</option>
+                    <option value="São Pedro de Alcântara/SC">São Pedro de Alcântara/SC</option>
+                </select>
+            </div>
+            <div>
+                <label for="pmrv_sentido" class="block text-sm font-semibold text-gray-700 mb-1">Sentido da Via</label>
+                <select id="pmrv_sentido" onchange="pmrv_toggleSentidoManual()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-white">
+                    <option value="Crescente">Crescente</option>
+                    <option value="Decrescente">Decrescente</option>
+                    <option value="Centro–Bairro">Centro–Bairro</option>
+                    <option value="Bairro–Centro">Bairro–Centro</option>
+                    <option value="Norte–Sul">Norte–Sul</option>
+                    <option value="Sul–Norte">Sul–Norte</option>
+                    <option value="MANUAL">Outro (Digitar manualmente)</option>
+                </select>                <input type="text" id="pmrv_sentido_manual" class="hidden w-full p-3 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition" placeholder="Ex: Sentido Palhoça" oninput="pmrv_atualizar()">
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-lg hover:bg-gray-300 transition">VOLTAR</button>
+                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition">SEGUINTE</button>
+            </div>
+        </section>
+
+        <!-- Passo 3: Natureza e Dinâmica -->
+        <section id="step-3" class="step-content hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2 mb-4">
+                <h2 class="text-xl font-bold text-pmrv">3. Natureza e Dinâmica</h2>
+                <button onclick="startVoiceRecognition('pmrv_dinamica_texto')" id="mic-btn" class="p-2 rounded-full hover:bg-gray-100 text-pmrv transition-all" title="Gravar por voz">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
+                </button>
+            </div>
+            <div>
+                <label for="pmrv_ocorrencia" class="block text-sm font-semibold text-gray-700 mb-1">Classificação</label>
+                <select id="pmrv_ocorrencia" onchange="pmrv_verificarVitimas()" class="w-full p-3 border border-blue-400 bg-blue-50 text-pmrv font-bold rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition">
+                    <option value="Sinistro de trânsito com danos materiais">APENAS DANOS MATERIAIS</option>
+                    <option value="Sinistro de trânsito com vítima(s)">COM VÍTIMA(S)</option>
+                </select>
+            </div>
+            <div>
+                <label for="pmrv_subtipo" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Sinistro</label>
+                <select id="pmrv_subtipo" onchange="pmrv_mudarSubtipo()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-white">
+                    <optgroup label="Atropelamento">
+                        <option value="1.1">1.1 Atropelamento de Pedestre</option>
+                        <option value="1.2">1.2 Atropelamento de Animal</option>
+                    </optgroup>
+                    <optgroup label="Abalroamento">
+                        <option value="2.1">2.1 Abalroamento Longitudinal (Mesmo Sentido)</option>
+                        <option value="2.2">2.2 Abalroamento Longitudinal (Sentidos Opostos)</option>
+                        <option value="2.3">2.3 Abalroamento Transversal</option>
+                    </optgroup>
+                    <optgroup label="Colisão">
+                        <option value="3.1">3.1 Colisão Frontal</option>
+                        <option value="3.2">3.2 Colisão Traseira</option>
+                        <option value="3.3">3.3 Colisão (Engavetamento)</option>
+                    </optgroup>
+                    <optgroup label="Choque">
+                        <option value="4.1">4.1 Choque (Poste)</option>
+                        <option value="4.6">4.6 Choque (Defensa)</option>
+                        <option value="4.9">4.9 Choque (Objeto...)</option>
+                    </optgroup>
+                    <optgroup label="Perda de Controle">
+                        <option value="5.1">5.1 Saída de Pista</option>
+                        <option value="5.3">5.3 Capotamento</option>
+                        <option value="5.4">5.4 Tombamento</option>
+                        <option value="6.1">6.1 Saída de Pista + Choque (Poste)</option>
+                        <option value="6.2">6.2 Saída de Pista + Choque (Muro)</option>
+                        <option value="6.3">6.3 Saída de Pista + Choque (Defensa)</option>
+                        <option value="6.4">6.4 Saída de Pista + Choque (Objeto...)</option>
+                    </optgroup>
+                    <optgroup label="Diversos">
+                        <option value="7.1">7.1 Outros (Especificar)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div id="pmrv_box_objeto" class="hidden">
+                <label for="pmrv_nome_objeto" class="block text-sm font-semibold text-gray-700 mb-1">Qual objeto?</label>
+                <input type="text" id="pmrv_nome_objeto" placeholder="Ex: árvore, poste..." oninput="pmrv_mudarSubtipo()" class="w-full p-3 border border-amber-300 bg-amber-50 rounded-lg outline-none transition">
+            </div>
+            <div id="pmrv_box_outros" class="hidden">
+                <label for="pmrv_descricao_outros" class="block text-sm font-semibold text-gray-700 mb-1">Especifique</label>
+                <input type="text" id="pmrv_descricao_outros" placeholder="Natureza da ocorrência..." oninput="pmrv_mudarSubtipo()" class="w-full p-3 border border-amber-300 bg-amber-50 rounded-lg outline-none transition">
+            </div>
+            <div>
+                <label for="pmrv_dinamica_texto" class="block text-sm font-semibold text-gray-700 mb-1">Descrição da Dinâmica (Editável)</label>
+                <textarea id="pmrv_dinamica_texto" rows="4" oninput="pmrv_atualizar()" spellcheck="true" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition leading-relaxed"></textarea>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-lg hover:bg-gray-300 transition">VOLTAR</button>
+                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition">SEGUINTE</button>
+            </div>
+        </section>
+
+        <!-- Passo 4: Vítimas -->
+        <section id="step-4" class="step-content hidden bg-white rounded-xl shadow-sm border border-red-200 p-6 space-y-4">
+            <h2 class="text-xl font-bold text-red-700 mb-4 border-b pb-2">4. Vítimas</h2>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase text-center">Leves</label>
+                    <input type="number" id="pmrv_qtd_leve" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg text-center font-bold text-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-orange-600 mb-1 uppercase text-center">Graves</label>
+                    <input type="number" id="pmrv_qtd_grave" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 border border-orange-300 bg-orange-50 rounded-lg text-center font-bold text-lg text-orange-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-red-600 mb-1 uppercase text-center">Óbitos</label>
+                    <input type="number" id="pmrv_qtd_gravissima" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 border border-red-300 bg-red-50 rounded-lg text-center font-bold text-lg text-red-700">
+                </div>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-lg hover:bg-gray-300 transition">VOLTAR</button>
+                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition">SEGUINTE</button>
+            </div>
+        </section>
+
+        <!-- Passo 5: Revisão Final -->
+        <section id="step-5" class="step-content hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-2 mb-4">
+                <h2 class="text-xl font-bold text-pmrv">✓ Revisão e Edição Final</h2>
+                <button onclick="startVoiceRecognition('pmrv_relatorio_edit')" class="p-2 rounded-full hover:bg-gray-100 text-pmrv transition-all" title="Adicionar por voz">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
+                </button>
+            </div>
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-sm font-semibold text-gray-700">Relatório Completo (Editável)</label>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase bg-gray-200 px-2 py-1 rounded">Revisão Geral</span>
+                </div>
+                <textarea id="pmrv_relatorio_edit" rows="14" spellcheck="true" oninput="pmrv_syncManualEdit(this)" class="w-full bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs leading-relaxed shadow-inner outline-none focus:ring-2 focus:ring-green-500 transition-all border-none"></textarea>
+            </div>
+            <div class="space-y-3">
+                <button onclick="pmrv_enviarWhatsApp()" class="w-full bg-whatsapp hover:bg-green-600 text-white font-bold py-5 px-4 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-3 text-xl">
+                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    ENVIAR TUDO NO WHATSAPP
+                </button>
+                <button onclick="pmrv_copiarPMSC()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 text-lg uppercase tracking-tight">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                    Copiar Relatório p/ Mobile (Limpo)
+                </button>
+                <div class="flex gap-2 text-sm">
+                    <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-lg">VOLTAR</button>
+                    <button onclick="pmrv_limpar()" class="flex-1 bg-red-100 text-red-700 font-bold py-3 rounded-lg">NOVA OCORRÊNCIA</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const PMRV_DINAMICAS = {
+            '1.1': 'O veículo V1 transitava pela via quando atropelou um pedestre.',
+            '1.2': 'O veículo V1 transitava pela via quando atropelou um animal.',
+            '2.1': 'Os veículos transitavam no mesmo sentido quando ocorreu abalroamento longitudinal.',
+            '2.2': 'Os veículos transitavam em sentidos opostos quando ocorreu abalroamento longitudinal.',
+            '2.3': 'O veículo V1 abalroou transversalmente o veículo V2.',
+            '3.1': 'Os veículos colidiram frontalmente.',
+            '3.2': 'O veículo V1 colidiu na traseira do veículo V2.',
+            '3.3': 'O veículo V1 colidiu com outros veículos, ocasionando engavetamento.',
+            '4.1': 'O veículo V1 chocou-se contra um poste.',
+            '4.6': 'O veículo V1 chocou-se contra uma defensa.',
+            '4.9': 'O veículo V1 chocou-se contra [OBJETO].',
+            '5.1': 'O veículo V1 perdeu o controle direcional e saiu da pista.',
+            '5.3': 'O veículo V1 perdeu o controle direcional, saiu da pista e capotou.',
+            '5.4': 'O veículo V1 perdeu o controle direcional, saiu da pista e tombou.',
+            '6.1': 'O veículo V1 saiu da pista e chocou-se contra um poste.',
+            '6.2': 'O veículo V1 saiu da pista e chocou-se contra um muro.',
+            '6.3': 'O veículo V1 saiu da pista e chocou-se contra uma defensa.',
+            '6.4': 'O veículo V1 saiu da pista e chocou-se contra [OBJETO].',
+            '7.1': 'Ocorrência registrada como [OUTROS].'
+        };
+
+        let currentStep = 1;
+        const totalSteps = 5;
+        let isManuallyEditingReport = false;
+        let finalReportText = "";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            pmrv_init();
+            registerServiceWorker();
+            updateStepper();
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+        });
+
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => console.error(err));
+            }
+        }
+
+        // --- Wizard Navigation ---
+        function nextStep() {
+            if (currentStep === 3 && document.getElementById('pmrv_ocorrencia').value !== 'Sinistro de trânsito com vítima(s)') {
+                currentStep = 5;
+            } else if (currentStep < totalSteps) {
+                currentStep++;
+            }
+            showStep(currentStep);
+            updateStepper();
+        }
+
+        function prevStep() {
+            if (currentStep === 5 && document.getElementById('pmrv_ocorrencia').value !== 'Sinistro de trânsito com vítima(s)') {
+                currentStep = 3;
+            } else if (currentStep > 1) {
+                currentStep--;
+            }
+            showStep(currentStep);
+            updateStepper();
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            if (step === 5) {
+                isManuallyEditingReport = false;
+                pmrv_atualizar();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateStepper() {
+            const progress = document.getElementById('stepper-progress');
+            const dots = document.querySelectorAll('.step-dot');
+            const ehVitima = document.getElementById('pmrv_ocorrencia').value === 'Sinistro de trânsito com vítima(s)';
+            
+            document.getElementById('dot-vitimas').classList.toggle('hidden', !ehVitima);
+            
+            const stepsMap = ehVitima ? [1, 2, 3, 4, 5] : [1, 2, 3, 5];
+            const activeIndex = stepsMap.indexOf(currentStep);
+            const totalActive = stepsMap.length;
+            
+            progress.style.width = ((activeIndex) / (totalActive - 1)) * 100 + '%';
+
+            dots.forEach(dot => {
+                const stepNum = parseInt(dot.getAttribute('data-step'));
+                if (stepNum === currentStep) {
+                    dot.classList.replace('bg-gray-300', 'bg-pmrv');
+                    dot.classList.replace('bg-green-500', 'bg-pmrv');
+                } else if (stepsMap.indexOf(stepNum) < activeIndex && stepsMap.indexOf(stepNum) !== -1) {
+                    dot.classList.replace('bg-gray-300', 'bg-green-500');
+                    dot.classList.replace('bg-pmrv', 'bg-green-500');
+                } else {
+                    dot.classList.replace('bg-pmrv', 'bg-gray-300');
+                    dot.classList.replace('bg-green-500', 'bg-gray-300');
+                }
+            });
+        }
+
+        // --- Voice Logic ---
+        function startVoiceRecognition(targetId) {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Seu navegador não suporta comando de voz.");
+                return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.interimResults = false;
+            
+            const micBtn = document.getElementById('mic-btn');
+            
+            recognition.onstart = () => micBtn.classList.add('recording-active');
+            recognition.onend = () => micBtn.classList.remove('recording-active');
+            
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                const field = document.getElementById(targetId);
+                field.value += (field.value ? ' ' : '') + text;
+                pmrv_atualizar();
+            };
+
+            recognition.start();
+        }
+
+        // --- Core Logic ---
+        function pmrv_init() {
+            const vtr = localStorage.getItem('PMRV_VTR');
+            if (vtr) document.getElementById('pmrv_vtr').value = vtr;
+            pmrv_verificarRodovia();
+            pmrv_verificarVitimas();
+            pmrv_toggleSentidoManual();
+            pmrv_mudarSubtipo();
+        }
+
+        function pmrv_validarVtr(input) {
+            input.value = input.value.replace(/\D/g, '').substring(0, 4);
+            localStorage.setItem('PMRV_VTR', input.value);
+            pmrv_atualizar();
+        }
+
+        function pmrv_verificarVitimas() {
+            updateStepper();
+            pmrv_atualizar();
+        }
+
+        function pmrv_verificarRodovia() {
+            const rod = document.getElementById('pmrv_rodovia').value;
+            const cidade = document.getElementById('pmrv_cidade');
+            const sel407 = document.getElementById('pmrv_cidade_407');
+            const sel281 = document.getElementById('pmrv_cidade_281');
+            const floripaRodovias = ['SC-400','SC-401','SC-402','SC-403','SC-404','SC-405','SC-406'];
+            
+            sel407.classList.add('hidden');
+            sel281.classList.add('hidden');
+            cidade.classList.remove('bg-gray-50');
+
+            if (floripaRodovias.includes(rod)) {
+                cidade.value = 'Florianópolis/SC';
+                cidade.readOnly = true;
+                cidade.classList.add('bg-gray-50', 'text-gray-500');
+            } else if (rod === 'SC-407') {
+                sel407.classList.remove('hidden');
+                cidade.value = sel407.value;
+                cidade.readOnly = true;
+                cidade.classList.add('bg-gray-50', 'text-gray-500');
+            } else if (rod === 'SC-281') {
+                sel281.classList.remove('hidden');
+                cidade.value = sel281.value;
+                cidade.readOnly = true;
+                cidade.classList.add('bg-gray-50', 'text-gray-500');
+            } else {
+                cidade.readOnly = false;
+                cidade.classList.remove('text-gray-500');
+                if (['Florianópolis/SC', 'Biguaçu/SC', 'São José/SC'].includes(cidade.value)) cidade.value = '';
+            }
+            pmrv_atualizar();
+        }
+
+        function pmrv_selecionarCidade407() {
+            document.getElementById('pmrv_cidade').value = document.getElementById('pmrv_cidade_407').value;
+            pmrv_atualizar();
+        }
+
+        function pmrv_selecionarCidade281() {
+            document.getElementById('pmrv_cidade').value = document.getElementById('pmrv_cidade_281').value;
+            pmrv_atualizar();
+        }
+
+        function pmrv_toggleSentidoManual() {
+            const manual = document.getElementById('pmrv_sentido').value === 'MANUAL';
+            document.getElementById('pmrv_sentido_manual').classList.toggle('hidden', !manual);
+            pmrv_atualizar();
+        }
+
+        function pmrv_mudarSubtipo() {
+            const cod = document.getElementById('pmrv_subtipo').value;
+            const objeto = document.getElementById('pmrv_nome_objeto').value || '[OBJETO]';
+            const outros = document.getElementById('pmrv_descricao_outros').value || '[OUTROS]';
+            document.getElementById('pmrv_box_objeto').classList.toggle('hidden', !['4.9', '6.4'].includes(cod));
+            document.getElementById('pmrv_box_outros').classList.toggle('hidden', cod !== '7.1');
+            let texto = PMRV_DINAMICAS[cod] || '';
+            if (['4.9', '6.4'].includes(cod)) texto = texto.replace('[OBJETO]', objeto);
+            if (cod === '7.1') texto = texto.replace('[OUTROS]', outros);
+            document.getElementById('pmrv_dinamica_texto').value = texto;
+            pmrv_atualizar();
+        }
+
+        function pmrv_gerarTexto(negrito = false) {
+            const b = negrito ? '*' : '';
+            const sade = document.getElementById('pmrv_sade').value || '---';
+            const vtr = document.getElementById('pmrv_vtr').value || '---';
+            const cidade = document.getElementById('pmrv_cidade').value || '---';
+            const rodovia = document.getElementById('pmrv_rodovia').value || '---';
+            const kmRaw = document.getElementById('pmrv_km').value;
+            const km = kmRaw ? parseFloat(kmRaw).toLocaleString('pt-BR', { minimumFractionDigits: 3 }) : '---';
+            const conhc = document.getElementById('pmrv_conhecimento').value;
+            const ocorr = document.getElementById('pmrv_ocorrencia').value;
+            const dinamica = document.getElementById('pmrv_dinamica_texto').value;
+            const sentido = document.getElementById('pmrv_sentido').value === 'MANUAL' ? document.getElementById('pmrv_sentido_manual').value : document.getElementById('pmrv_sentido').value;
+            
+            const sel = document.getElementById('pmrv_subtipo');
+            let tipoLabel = sel.options[sel.selectedIndex].text.split(' ').slice(1).join(' ');
+            if (sel.value === '7.1') tipoLabel = document.getElementById('pmrv_descricao_outros').value || 'Outros';
+
+            let infoV = '';
+            if (ocorr === 'Sinistro de trânsito com vítima(s)') {
+                const l = parseInt(document.getElementById('pmrv_qtd_leve').value) || 0;
+                const g = parseInt(document.getElementById('pmrv_qtd_grave').value) || 0;
+                const gs = parseInt(document.getElementById('pmrv_qtd_gravissima').value) || 0;
+                
+                const partes = [];
+                if (l > 0) partes.push(`${String(l).padStart(2,'0')} leve(s)`);
+                if (g > 0) partes.push(`${String(g).padStart(2,'0')} grave(s)`);
+                if (gs > 0) partes.push(`${String(gs).padStart(2,'0')} gravíssima(s)`);
+                
+                if (partes.length > 0) {
+                    infoV = `\n${b}Vítimas:${b} ${partes.join(', ')}`;
+                } else {
+                    infoV = `\n${b}Vítimas:${b} Sem registro de quantidades`;
+                }
+            }
+
+            const hora = document.getElementById('pmrv_hora_manual').checked ? (document.getElementById('pmrv_input_hora').value || '---') : new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            return `${b}COMANDO DE POLÍCIA MILITAR RODOVIÁRIA${b}\n` +
+                   `${b}1º BPMRv / 1ª CIA / Posto 19${b}\n` +
+                   `${b}Protocolo SADE:${b} ${sade}\n` +
+                   `${b}Data:${b} ${new Date().toLocaleDateString('pt-BR')}\n` +
+                   `${b}Hora:${b} ${hora}\n` +
+                   `${b}Rodovia:${b} ${rodovia} / ${b}KM:${b} ${km}\n` +
+                   `${b}Cidade:${b} ${cidade}\n` +
+                   `${b}Tipo de ocorrência:${b} ${ocorr}\n` +
+                   `${b}Tipo de sinistro:${b} ${tipoLabel}${infoV}\n\n` +
+                   `A guarnição foi acionada ${conhc} para atendimento de sinistro na rodovia ${rodovia}, km ${km}, sentido ${sentido || '---'}, sendo empenhada a Viatura PM-${vtr}.\n` +
+                   `${dinamica}\n\n` +
+                   `Foram adotadas as providências administrativas cabíveis.`;
+        }
+
+        function pmrv_atualizar() {
+            if (!isManuallyEditingReport) {
+                finalReportText = pmrv_gerarTexto(true); // Always generate with bold asterisks
+                const elEdit = document.getElementById('pmrv_relatorio_edit');
+                if (elEdit) elEdit.value = finalReportText;
+            }
+        }
+
+        function pmrv_syncManualEdit(textarea) {
+            isManuallyEditingReport = true;
+            finalReportText = textarea.value;
+        }
+
+        function pmrv_enviarWhatsApp() {
+            // Pega exatamente o que está na caixa de edição (Relatório Completo)
+            const textToSend = document.getElementById('pmrv_relatorio_edit').value || finalReportText;
+            window.open('https://wa.me/?text=' + encodeURIComponent(textToSend), '_blank');
+        }
+
+        function pmrv_copiarPMSC() {
+            // Pega exatamente o que está na caixa de edição (Relatório Completo)
+            const textWithBold = document.getElementById('pmrv_relatorio_edit').value || finalReportText;
+            
+            // REMOVE ABSOLUTAMENTE TODOS OS ASTERISCOS (*) PARA O PMSC MOBILE
+            const cleanText = textWithBold.replace(/\*/g, '');
+            
+            navigator.clipboard.writeText(cleanText).then(() => {
+                alert("RELATÓRIO COMPLETO COPIADO!\n\nO texto foi limpo (sem asteriscos) e está pronto para colar no PMSC Mobile.");
+            }).catch(err => {
+                console.error('Erro ao copiar: ', err);
+                alert("Erro ao copiar. Por favor, selecione o texto e copie manualmente.");
+            });
+        }
+
+        function pmrv_limpar() {
+            if (confirm('Deseja iniciar uma nova ocorrência? Todos os dados serão perdidos.')) {
+                location.reload();
+            }
+        }
+
+        function updateOnlineStatus() {
+            const indicator = document.getElementById('offline-indicator');
+            if (indicator) indicator.classList.toggle('hidden', navigator.onLine);
+        }
+    </script>
+</body>
+</html>
