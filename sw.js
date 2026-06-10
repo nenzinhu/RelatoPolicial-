@@ -1,9 +1,12 @@
-const CACHE_NAME = 'pmrv-p19-v2';
+const CACHE_NAME = 'pmrv-p19-v9';
 const ASSETS = [
   'index.html',
   'manifest.json',
   'app.js',
-  'style.css'
+  'style.css',
+  'icon-192.png',
+  'icon-512.png',
+  'apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {

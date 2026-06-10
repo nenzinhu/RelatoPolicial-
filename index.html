@@ -2,23 +2,36 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Relato Policial Padrão</title>
+    <meta name="theme-color" content="#0A0A0A">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="PMRv P19">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                        sans: ['IBM Plex Sans', 'ui-sans-serif', 'system-ui'],
+                        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
                     },
                     colors: {
-                        pmrv: '#1e3a8a',
+                        pmrv: '#0A0A0A',
+                        charcoal: '#2B2B2B',
+                        bone: '#F5F0E8',
+                        gold: '#C8933F',
+                        brick: '#C44536',
+                        'step-idle': '#D8D2C4',
+                        'step-done': '#C8933F',
                         whatsapp: '#16a34a'
                     }
                 }
@@ -26,88 +39,91 @@
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-900 antialiased font-sans pb-10">
+<body class="bg-bone text-charcoal antialiased font-sans pb-10">
 
-    <header class="bg-white border-b border-slate-200 text-pmrv p-4 sticky top-0 z-50 shadow-sm">
+    <header class="bg-white border-b-2 border-charcoal p-4 sticky top-0 z-50">
         <div class="max-w-xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-extrabold tracking-tight uppercase">Relato Policial Padrão</h1>
-            <span id="offline-indicator" class="hidden bg-red-600 text-white text-[10px] px-2 py-1 rounded-full font-bold uppercase animate-pulse">Offline</span>
+            <div class="flex items-center gap-3">
+                <span class="w-4 h-4 bg-gold border-2 border-pmrv" aria-hidden="true"></span>
+                <h1 class="text-lg font-mono font-semibold tracking-tight uppercase text-pmrv">Relato Policial Padrão</h1>
+            </div>
+            <span id="offline-indicator" class="hidden bg-brick text-white text-[10px] px-2 py-1 font-mono font-semibold uppercase tracking-wider animate-pulse">Offline</span>
         </div>
     </header>
 
     <!-- Stepper Indicator -->
-    <div class="max-w-xl mx-auto px-6 py-4">
+    <div class="max-w-xl mx-auto px-6 py-5">
         <div class="flex items-center justify-between relative">
-            <div class="absolute left-0 top-1/2 w-full h-1 bg-gray-300 -translate-y-1/2 z-0"></div>
-            <div id="stepper-progress" class="absolute left-0 top-1/2 w-0 h-1 bg-pmrv -translate-y-1/2 z-0 transition-all duration-300"></div>
-            
-            <div class="step-dot z-10 w-8 h-8 rounded-full bg-pmrv text-white flex items-center justify-center font-bold text-sm shadow-md" data-step="1">1</div>
-            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="2">2</div>
-            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="3">3</div>
-            <div id="dot-vitimas" class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm hidden" data-step="4">4</div>
-            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="5">5</div>
-            <div class="step-dot z-10 w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center font-bold text-sm" data-step="6">✓</div>
+            <div class="absolute left-0 top-1/2 w-full h-0.5 bg-step-idle -translate-y-1/2 z-0"></div>
+            <div id="stepper-progress" class="absolute left-0 top-1/2 w-0 h-0.5 bg-pmrv -translate-y-1/2 z-0 transition-all duration-300"></div>
+
+            <div class="step-dot z-10 w-9 h-9 bg-pmrv border-2 border-pmrv flex items-center justify-center font-mono font-semibold text-sm" data-step="1">1</div>
+            <div class="step-dot z-10 w-9 h-9 bg-step-idle border-2 border-charcoal flex items-center justify-center font-mono font-semibold text-sm" data-step="2">2</div>
+            <div class="step-dot z-10 w-9 h-9 bg-step-idle border-2 border-charcoal flex items-center justify-center font-mono font-semibold text-sm" data-step="3">3</div>
+            <div id="dot-vitimas" class="step-dot z-10 w-9 h-9 bg-step-idle border-2 border-charcoal flex items-center justify-center font-mono font-semibold text-sm hidden" data-step="4">4</div>
+            <div class="step-dot z-10 w-9 h-9 bg-step-idle border-2 border-charcoal flex items-center justify-center font-mono font-semibold text-sm" data-step="5">5</div>
+            <div class="step-dot z-10 w-9 h-9 bg-step-idle border-2 border-charcoal flex items-center justify-center font-mono font-semibold text-sm" data-step="6">✓</div>
         </div>
     </div>
 
     <main id="wizard-container" class="max-w-xl mx-auto p-4 relative overflow-hidden">
 
         <!-- Passo 1: Identificação -->
-        <section id="step-1" class="step-content bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-2 mb-4">
-                <h2 class="text-xl font-bold text-pmrv">1. Identificação</h2>
-                <button onclick="startVoiceCommandStep1()" id="mic-btn-step1" class="p-2 rounded-full hover:bg-slate-100 text-pmrv transition-all" title="Preencher por voz (Diga: Protocolo..., Viatura..., Conhecimento...)">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
+        <section id="step-1" class="step-content bg-white border-2 border-charcoal shadow-[4px_4px_0_#2B2B2B] p-6 space-y-4">
+            <div class="flex justify-between items-center border-b-2 border-charcoal pb-3 mb-4">
+                <h2 class="text-lg font-mono font-semibold uppercase tracking-tight text-pmrv"><span class="text-gold">1.</span> Identificação</h2>
+                <button onclick="startVoiceCommandStep1()" id="mic-btn-step1" class="p-2 border-2 border-charcoal hover:bg-bone text-pmrv transition-all" title="Preencher por voz (Diga: Protocolo..., Viatura..., Conhecimento...)">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
                 </button>
             </div>
             <div>
-                <label for="pmrv_sade" class="block text-sm font-semibold text-gray-700 mb-1">Protocolo SADE</label>
-                <input type="text" id="pmrv_sade" placeholder="Ex: 1234567" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition">
+                <label for="pmrv_sade" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Protocolo SADE</label>
+                <input type="text" id="pmrv_sade" placeholder="Ex: 1234567" inputmode="numeric" maxlength="9" oninput="pmrv_validarSade(this)" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition">
             </div>
             <div>
-                <label for="pmrv_vtr" class="block text-sm font-semibold text-gray-700 mb-1">Viatura (PM-XXXX)</label>
-                <input type="text" id="pmrv_vtr" placeholder="Ex: 1234" oninput="pmrv_validarVtr(this)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition text-lg font-bold tracking-widest uppercase">
+                <label for="pmrv_vtr" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Viatura (PM-XXXX)</label>
+                <input type="text" id="pmrv_vtr" placeholder="Ex: 1234" oninput="pmrv_validarVtr(this)" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition text-lg font-mono font-semibold tracking-widest uppercase">
             </div>
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Hora do Sinistro</label>
-                <div class="flex gap-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Hora do Sinistro</label>
+                <div class="flex gap-4 p-3 bg-bone border-2 border-charcoal">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="pmrv_hora_tipo" id="pmrv_hora_auto" checked onclick="pmrv_atualizar()" class="w-4 h-4 text-pmrv focus:ring-pmrv">
+                        <input type="radio" name="pmrv_hora_tipo" id="pmrv_hora_auto" checked onclick="pmrv_atualizar()" class="w-4 h-4 text-pmrv focus:ring-gold">
                         <span class="text-sm">Automática (Agora)</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="pmrv_hora_tipo" id="pmrv_hora_manual" onclick="pmrv_atualizar()" class="w-4 h-4 text-pmrv focus:ring-pmrv">
+                        <input type="radio" name="pmrv_hora_tipo" id="pmrv_hora_manual" onclick="pmrv_atualizar()" class="w-4 h-4 text-pmrv focus:ring-gold">
                         <span class="text-sm">Manual</span>
                     </label>
                 </div>
-                <input type="time" id="pmrv_input_hora" class="hidden w-full p-3 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition" oninput="pmrv_atualizar()">
+                <input type="time" id="pmrv_input_hora" class="hidden w-full p-3 mt-2 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition" oninput="pmrv_atualizar()">
             </div>
             <div>
-                <label for="pmrv_conhecimento" class="block text-sm font-semibold text-gray-700 mb-1">Conhecimento da Ocorrência</label>
-                <select id="pmrv_conhecimento" onchange="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition bg-white">
+                <label for="pmrv_conhecimento" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Conhecimento da Ocorrência</label>
+                <select id="pmrv_conhecimento" onchange="pmrv_atualizar()" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition">
                     <option value="pela Central">Pela Central</option>
                     <option value="por populares">Por Populares</option>
                     <option value="pela guarnição">Pela Guarnição</option>
                 </select>
             </div>
-            <button onclick="nextStep()" class="w-full bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition flex items-center justify-center gap-2">
-                SEGUINTE
+            <button onclick="nextStep()" class="w-full bg-pmrv text-white font-mono font-semibold uppercase tracking-wider py-4 border-2 border-pmrv shadow-[4px_4px_0_#C8933F] hover:bg-charcoal transition flex items-center justify-center gap-2">
+                Seguinte
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
             </button>
         </section>
 
         <!-- Passo 2: Localização -->
-        <section id="step-2" class="step-content hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-2 mb-4">
-                <h2 class="text-xl font-bold text-pmrv">2. Localização</h2>
-                <button onclick="startVoiceCommandStep2()" id="mic-btn-step2" class="p-2 rounded-full hover:bg-slate-100 text-pmrv transition-all" title="Preencher por voz (Diga: Rodovia..., KM...)">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
+        <section id="step-2" class="step-content hidden bg-white border-2 border-charcoal shadow-[4px_4px_0_#2B2B2B] p-6 space-y-4">
+            <div class="flex justify-between items-center border-b-2 border-charcoal pb-3 mb-4">
+                <h2 class="text-lg font-mono font-semibold uppercase tracking-tight text-pmrv"><span class="text-gold">2.</span> Localização</h2>
+                <button onclick="startVoiceCommandStep2()" id="mic-btn-step2" class="p-2 border-2 border-charcoal hover:bg-bone text-pmrv transition-all" title="Preencher por voz (Diga: Rodovia..., KM...)">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
                 </button>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="pmrv_rodovia" class="block text-sm font-semibold text-gray-700 mb-1">Rodovia</label>
-                    <select id="pmrv_rodovia" onchange="pmrv_verificarRodovia()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition bg-white font-bold">
+                    <label for="pmrv_rodovia" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Rodovia</label>
+                    <select id="pmrv_rodovia" onchange="pmrv_verificarRodovia()" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition font-mono font-semibold">
                         <option value="SC-401">SC-401</option>
                         <option value="SC-400">SC-400</option>
                         <option value="SC-402">SC-402</option>
@@ -121,25 +137,25 @@
                     </select>
                 </div>
                 <div>
-                    <label for="pmrv_km" class="block text-sm font-semibold text-gray-700 mb-1">KM</label>
-                    <input type="text" id="pmrv_km" placeholder="Ex: 12,345" oninput="pmrv_validarKM(this)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv focus:border-pmrv outline-none transition text-center font-bold" maxlength="6">
+                    <label for="pmrv_km" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">KM</label>
+                    <input type="text" id="pmrv_km" placeholder="Ex: 12,345" oninput="pmrv_validarKM(this)" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition text-center font-mono font-semibold" maxlength="6">
                 </div>
             </div>
             <div>
-                <label for="pmrv_cidade" class="block text-sm font-semibold text-gray-700 mb-1">Cidade</label>
-                <input type="text" id="pmrv_cidade" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-gray-50">
-                <select id="pmrv_cidade_407" class="hidden w-full p-3 mt-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-blue-50" onchange="pmrv_selecionarCidade407()">
+                <label for="pmrv_cidade" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Cidade</label>
+                <input type="text" id="pmrv_cidade" oninput="pmrv_atualizar()" class="w-full p-3 border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition bg-gray-50">
+                <select id="pmrv_cidade_407" class="hidden w-full p-3 mt-2 bg-bone border-2 border-gold focus:ring-2 focus:ring-gold outline-none transition" onchange="pmrv_selecionarCidade407()">
                     <option value="Biguaçu/SC">Biguaçu/SC</option>
                     <option value="Antônio Carlos/SC">Antônio Carlos/SC</option>
                 </select>
-                <select id="pmrv_cidade_281" class="hidden w-full p-3 mt-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-blue-50" onchange="pmrv_selecionarCidade281()">
+                <select id="pmrv_cidade_281" class="hidden w-full p-3 mt-2 bg-bone border-2 border-gold focus:ring-2 focus:ring-gold outline-none transition" onchange="pmrv_selecionarCidade281()">
                     <option value="São José/SC">São José/SC</option>
                     <option value="São Pedro de Alcântara/SC">São Pedro de Alcântara/SC</option>
                 </select>
             </div>
             <div>
-                <label for="pmrv_sentido" class="block text-sm font-semibold text-gray-700 mb-1">Sentido da Via</label>
-                <select id="pmrv_sentido" onchange="pmrv_toggleSentidoManual()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-white">
+                <label for="pmrv_sentido" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Sentido da Via</label>
+                <select id="pmrv_sentido" onchange="pmrv_toggleSentidoManual()" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition">
                     <option value="Crescente">Crescente</option>
                     <option value="Decrescente">Decrescente</option>
                     <option value="Centro–Bairro">Centro–Bairro</option>
@@ -147,34 +163,35 @@
                     <option value="Norte–Sul">Norte–Sul</option>
                     <option value="Sul–Norte">Sul–Norte</option>
                     <option value="MANUAL">Outro (Digitar manualmente)</option>
-                </select>                <input type="text" id="pmrv_sentido_manual" class="hidden w-full p-3 mt-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition" placeholder="Ex: Sentido Palhoça" oninput="pmrv_atualizar()">
+                </select>
+                <input type="text" id="pmrv_sentido_manual" class="hidden w-full p-3 mt-2 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition" placeholder="Ex: Sentido Palhoça" oninput="pmrv_atualizar()">
             </div>
             <div class="flex gap-3 pt-4">
-                <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-lg hover:bg-gray-300 transition">VOLTAR</button>
-                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition">SEGUINTE</button>
+                <button onclick="prevStep()" class="flex-1 bg-white text-charcoal font-mono font-semibold uppercase tracking-wider py-4 border-2 border-charcoal hover:bg-bone transition">Voltar</button>
+                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-mono font-semibold uppercase tracking-wider py-4 border-2 border-pmrv shadow-[4px_4px_0_#C8933F] hover:bg-charcoal transition">Seguinte</button>
             </div>
         </section>
 
         <!-- Passo 3: Natureza e Dinâmica -->
-        <section id="step-3" class="step-content hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-2 mb-4">
-                <h2 class="text-xl font-bold text-pmrv">3. Natureza e Dinâmica</h2>
-                <button onclick="startVoiceRecognition('pmrv_dinamica_texto')" id="mic-btn" class="p-2 rounded-full hover:bg-gray-100 text-pmrv transition-all" title="Gravar por voz">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
+        <section id="step-3" class="step-content hidden bg-white border-2 border-charcoal shadow-[4px_4px_0_#2B2B2B] p-6 space-y-4">
+            <div class="flex justify-between items-center border-b-2 border-charcoal pb-3 mb-4">
+                <h2 class="text-lg font-mono font-semibold uppercase tracking-tight text-pmrv"><span class="text-gold">3.</span> Natureza e Dinâmica</h2>
+                <button onclick="startVoiceRecognition('pmrv_dinamica_texto')" id="mic-btn" class="p-2 border-2 border-charcoal hover:bg-bone text-pmrv transition-all" title="Gravar por voz">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
                 </button>
             </div>
             <div>
-                <label for="pmrv_ocorrencia" class="block text-sm font-semibold text-gray-700 mb-1">Classificação</label>
-                <select id="pmrv_ocorrencia" onchange="pmrv_verificarVitimas()" class="w-full p-3 border border-blue-400 bg-blue-50 text-pmrv font-bold rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition">
+                <label for="pmrv_ocorrencia" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Classificação</label>
+                <select id="pmrv_ocorrencia" onchange="pmrv_verificarVitimas()" class="w-full p-3 bg-bone border-2 border-pmrv text-pmrv font-mono font-semibold focus:ring-2 focus:ring-gold outline-none transition">
                     <option value="Sinistro de trânsito com danos materiais">APENAS DANOS MATERIAIS</option>
                     <option value="Sinistro de trânsito com vítima(s)">COM VÍTIMA(S)</option>
                 </select>
             </div>
             <div>
-                <label for="pmrv_subtipo" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Sinistro</label>
-                <select id="pmrv_subtipo" onchange="pmrv_mudarSubtipo()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition bg-white">
+                <label for="pmrv_subtipo" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Tipo de Sinistro</label>
+                <select id="pmrv_subtipo" onchange="pmrv_mudarSubtipo()" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition">
                     <optgroup label="Atropelamento">
-                        <option value="1.1">1.1 Atropelamento de Pedestre</option>
+                        <option value="1.1">1.1 Atropelamento de Pedestre/Ciclista</option>
                         <option value="1.2">1.2 Atropelamento de Animal</option>
                     </optgroup>
                     <optgroup label="Abalroamento">
@@ -207,106 +224,85 @@
                 </select>
             </div>
             <div id="pmrv_box_objeto" class="hidden">
-                <label for="pmrv_nome_objeto" class="block text-sm font-semibold text-gray-700 mb-1">Qual objeto?</label>
-                <input type="text" id="pmrv_nome_objeto" placeholder="Ex: árvore, poste..." oninput="pmrv_mudarSubtipo()" class="w-full p-3 border border-amber-300 bg-amber-50 rounded-lg outline-none transition">
+                <label for="pmrv_nome_objeto" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Qual objeto?</label>
+                <input type="text" id="pmrv_nome_objeto" placeholder="Ex: árvore, poste..." oninput="pmrv_mudarSubtipo()" class="w-full p-3 bg-bone border-2 border-gold outline-none focus:ring-2 focus:ring-gold transition">
             </div>
             <div id="pmrv_box_outros" class="hidden">
-                <label for="pmrv_descricao_outros" class="block text-sm font-semibold text-gray-700 mb-1">Especifique</label>
-                <input type="text" id="pmrv_descricao_outros" placeholder="Natureza da ocorrência..." oninput="pmrv_mudarSubtipo()" class="w-full p-3 border border-amber-300 bg-amber-50 rounded-lg outline-none transition">
+                <label for="pmrv_descricao_outros" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Especifique</label>
+                <input type="text" id="pmrv_descricao_outros" placeholder="Natureza da ocorrência..." oninput="pmrv_mudarSubtipo()" class="w-full p-3 bg-bone border-2 border-gold outline-none focus:ring-2 focus:ring-gold transition">
             </div>
             <div>
-                <label for="pmrv_dinamica_texto" class="block text-sm font-semibold text-gray-700 mb-1">Descrição da Dinâmica (Editável)</label>
-                <textarea id="pmrv_dinamica_texto" rows="4" oninput="pmrv_atualizar()" spellcheck="true" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmrv outline-none transition leading-relaxed"></textarea>
+                <div class="flex justify-between items-center mb-2">
+                    <label for="pmrv_dinamica_texto" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal">Descrição da Dinâmica (Editável)</label>
+                    <button onclick="pmrv_configurarChaveIA()" class="p-1 border border-charcoal hover:bg-bone text-xs leading-none" title="Configurar chave da IA (Gemini)">🔑</button>
+                </div>
+                <div class="mb-2">
+                    <span class="block font-mono text-[10px] font-semibold uppercase tracking-wider text-gold mb-1">Descrição IA</span>
+                    <div class="flex gap-2">
+                        <button id="ia-btn-juridica" onclick="pmrv_gerarDescricaoIA('juridica')" class="ia-style-btn flex-1 bg-white text-pmrv font-mono text-xs font-semibold uppercase tracking-wider py-2 border-2 border-charcoal hover:bg-bone transition disabled:opacity-50">Jurídica</button>
+                        <button id="ia-btn-leiga" onclick="pmrv_gerarDescricaoIA('leiga')" class="ia-style-btn flex-1 bg-white text-pmrv font-mono text-xs font-semibold uppercase tracking-wider py-2 border-2 border-charcoal hover:bg-bone transition disabled:opacity-50">Leiga</button>
+                        <button id="ia-btn-tecnica" onclick="pmrv_gerarDescricaoIA('tecnica')" class="ia-style-btn flex-1 bg-white text-pmrv font-mono text-xs font-semibold uppercase tracking-wider py-2 border-2 border-charcoal hover:bg-bone transition disabled:opacity-50">Técnica</button>
+                    </div>
+                </div>
+                <textarea id="pmrv_dinamica_texto" rows="4" oninput="pmrv_atualizar()" spellcheck="true" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none transition leading-relaxed"></textarea>
             </div>
             <div class="flex gap-3 pt-4">
-                <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-lg hover:bg-gray-300 transition">VOLTAR</button>
-                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition">SEGUINTE</button>
+                <button onclick="prevStep()" class="flex-1 bg-white text-charcoal font-mono font-semibold uppercase tracking-wider py-4 border-2 border-charcoal hover:bg-bone transition">Voltar</button>
+                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-mono font-semibold uppercase tracking-wider py-4 border-2 border-pmrv shadow-[4px_4px_0_#C8933F] hover:bg-charcoal transition">Seguinte</button>
             </div>
         </section>
 
         <!-- Passo 4: Vítimas -->
-        <section id="step-4" class="step-content hidden bg-white rounded-xl shadow-sm border border-red-200 p-6 space-y-4">
-            <h2 class="text-xl font-bold text-red-700 mb-4 border-b pb-2">4. Vítimas</h2>
+        <section id="step-4" class="step-content hidden bg-white border-2 border-brick shadow-[4px_4px_0_#C44536] p-6 space-y-4">
+            <h2 class="text-lg font-mono font-semibold uppercase tracking-tight text-brick mb-4 border-b-2 border-brick pb-3"><span class="text-pmrv">4.</span> Vítimas</h2>
             <div class="grid grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-600 mb-1 uppercase text-center">Leves</label>
-                    <input type="number" id="pmrv_qtd_leve" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 border border-gray-300 rounded-lg text-center font-bold text-lg">
+                    <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal mb-2 text-center">Leves</label>
+                    <input type="number" id="pmrv_qtd_leve" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 bg-white border-2 border-charcoal focus:ring-2 focus:ring-gold outline-none text-center font-mono font-semibold text-lg">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-orange-600 mb-1 uppercase text-center">Graves</label>
-                    <input type="number" id="pmrv_qtd_grave" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 border border-orange-300 bg-orange-50 rounded-lg text-center font-bold text-lg text-orange-700">
+                    <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-gold mb-2 text-center">Graves</label>
+                    <input type="number" id="pmrv_qtd_grave" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 bg-bone border-2 border-gold focus:ring-2 focus:ring-gold outline-none text-center font-mono font-semibold text-lg text-charcoal">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-red-600 mb-1 uppercase text-center">Óbitos</label>
-                    <input type="number" id="pmrv_qtd_gravissima" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 border border-red-300 bg-red-50 rounded-lg text-center font-bold text-lg text-red-700">
+                    <label class="block font-mono text-xs font-semibold uppercase tracking-wider text-brick mb-2 text-center">Óbitos</label>
+                    <input type="number" id="pmrv_qtd_gravissima" value="0" min="0" oninput="pmrv_atualizar()" class="w-full p-3 bg-[#F9ECE9] border-2 border-brick focus:ring-2 focus:ring-brick outline-none text-center font-mono font-semibold text-lg text-brick">
                 </div>
             </div>
             <div class="flex gap-3 pt-4">
-                <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-4 rounded-lg hover:bg-gray-300 transition">VOLTAR</button>
-                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-bold py-4 rounded-lg shadow-md hover:bg-blue-900 transition">SEGUINTE</button>
+                <button onclick="prevStep()" class="flex-1 bg-white text-charcoal font-mono font-semibold uppercase tracking-wider py-4 border-2 border-charcoal hover:bg-bone transition">Voltar</button>
+                <button onclick="nextStep()" class="flex-[2] bg-pmrv text-white font-mono font-semibold uppercase tracking-wider py-4 border-2 border-pmrv shadow-[4px_4px_0_#C8933F] hover:bg-charcoal transition">Seguinte</button>
             </div>
         </section>
 
         <!-- Passo 5: Revisão Final -->
-        <section id="step-5" class="step-content hidden bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-            <div class="flex justify-between items-center border-b pb-2 mb-4">
-                <h2 class="text-xl font-bold text-pmrv">✓ Revisão e Edição Final</h2>
-                <button onclick="startVoiceRecognition('pmrv_relatorio_edit')" class="p-2 rounded-full hover:bg-gray-100 text-pmrv transition-all" title="Adicionar por voz">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
+        <section id="step-5" class="step-content hidden bg-white border-2 border-charcoal shadow-[4px_4px_0_#2B2B2B] p-6 space-y-4">
+            <div class="flex justify-between items-center border-b-2 border-charcoal pb-3 mb-4">
+                <h2 class="text-lg font-mono font-semibold uppercase tracking-tight text-pmrv"><span class="text-gold">✓</span> Revisão e Edição Final</h2>
+                <button onclick="startVoiceRecognition('pmrv_relatorio_edit')" class="p-2 border-2 border-charcoal hover:bg-bone text-pmrv transition-all" title="Adicionar por voz">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
                 </button>
             </div>
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-2">
-                    <label class="block text-sm font-semibold text-gray-700">Relatório Completo (Editável)</label>
-                    <span class="text-[10px] text-gray-500 font-bold uppercase bg-gray-200 px-2 py-1 rounded">Revisão Geral</span>
+                    <label for="pmrv_relatorio_edit" class="block font-mono text-xs font-semibold uppercase tracking-wider text-charcoal">Relatório Completo (Editável)</label>
+                    <span class="text-[10px] text-charcoal font-mono font-semibold uppercase tracking-wider bg-bone border border-charcoal px-2 py-1">Revisão Geral</span>
                 </div>
-                <textarea id="pmrv_relatorio_edit" rows="14" spellcheck="true" oninput="pmrv_syncManualEdit(this)" class="w-full bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs leading-relaxed shadow-inner outline-none focus:ring-2 focus:ring-green-500 transition-all border-none"></textarea>
+                <textarea id="pmrv_relatorio_edit" rows="14" spellcheck="true" oninput="pmrv_syncManualEdit(this)" class="w-full bg-pmrv text-bone p-4 font-mono text-xs leading-relaxed outline-none focus:ring-2 focus:ring-gold transition-all border-2 border-charcoal"></textarea>
+                <button onclick="pmrv_revisarOrtografiaIA()" id="btn-revisar-ia" class="w-full mt-2 bg-white text-pmrv font-mono text-xs font-semibold uppercase tracking-wider py-3 border-2 border-charcoal hover:bg-bone transition disabled:opacity-50 flex items-center justify-center gap-2">🔍 Revisar Ortografia com IA (Norma Culta)</button>
             </div>
             <div class="space-y-3">
-                <button onclick="pmrv_enviarWhatsApp()" class="w-full bg-whatsapp hover:bg-green-600 text-white font-bold py-5 px-4 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-3 text-xl">
-                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    ENVIAR TUDO NO WHATSAPP
+                <button onclick="pmrv_enviarWhatsApp()" class="w-full bg-whatsapp hover:bg-green-700 text-white font-mono font-semibold uppercase tracking-wide py-5 px-4 border-2 border-pmrv shadow-[4px_4px_0_#0A0A0A] transition transform active:scale-95 flex items-center justify-center gap-3 text-lg">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Enviar tudo no WhatsApp
                 </button>
-                <button onclick="pmrv_copiarPMSC()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 text-lg uppercase tracking-tight">
+                <button onclick="pmrv_copiarPMSC()" class="w-full bg-gold hover:bg-[#B8842F] text-pmrv font-mono font-semibold uppercase tracking-wide py-4 px-4 border-2 border-pmrv shadow-[4px_4px_0_#0A0A0A] transition transform active:scale-95 flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                     Copiar Relatório p/ Mobile (Limpo)
                 </button>
                 <div class="flex gap-2 text-sm">
-                    <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-lg">VOLTAR</button>
-                    <button onclick="pmrv_limpar()" class="flex-1 bg-red-100 text-red-700 font-bold py-3 rounded-lg">NOVA OCORRÊNCIA</button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <script src="app.js"></script>
-</body>
-</html>
-  <h2 class="text-xl font-bold text-pmrv">✓ Revisão e Edição Final</h2>
-                <button onclick="startVoiceRecognition('pmrv_relatorio_edit')" class="p-2 rounded-full hover:bg-gray-100 text-pmrv transition-all" title="Adicionar por voz">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"/></svg>
-                </button>
-            </div>
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-2">
-                    <label class="block text-sm font-semibold text-gray-700">Relatório Completo (Editável)</label>
-                    <span class="text-[10px] text-gray-500 font-bold uppercase bg-gray-200 px-2 py-1 rounded">Revisão Geral</span>
-                </div>
-                <textarea id="pmrv_relatorio_edit" rows="14" spellcheck="true" oninput="pmrv_syncManualEdit(this)" class="w-full bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-xs leading-relaxed shadow-inner outline-none focus:ring-2 focus:ring-green-500 transition-all border-none"></textarea>
-            </div>
-            <div class="space-y-3">
-                <button onclick="pmrv_enviarWhatsApp()" class="w-full bg-whatsapp hover:bg-green-600 text-white font-bold py-5 px-4 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-3 text-xl">
-                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                    ENVIAR TUDO NO WHATSAPP
-                </button>
-                <button onclick="pmrv_copiarPMSC()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 text-lg uppercase tracking-tight">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                    Copiar Relatório p/ Mobile (Limpo)
-                </button>
-                <div class="flex gap-2 text-sm">
-                    <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-lg">VOLTAR</button>
-                    <button onclick="pmrv_limpar()" class="flex-1 bg-red-100 text-red-700 font-bold py-3 rounded-lg">NOVA OCORRÊNCIA</button>
+                    <button onclick="prevStep()" class="flex-1 bg-white text-charcoal font-mono font-semibold uppercase tracking-wider py-3 border-2 border-charcoal hover:bg-bone transition">Voltar</button>
+                    <button onclick="pmrv_limpar()" class="flex-1 bg-white text-brick font-mono font-semibold uppercase tracking-wider py-3 border-2 border-brick hover:bg-[#F9ECE9] transition">Nova Ocorrência</button>
                 </div>
             </div>
         </section>

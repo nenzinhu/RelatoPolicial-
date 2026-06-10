@@ -1,7 +1,7 @@
 const PMRV_DINAMICAS = {
-    '1.1': 'Quanto à dinâmica dos fatos, presume-se que o condutor @@ transitava com seu veículo @@, quando atropelou um pedestre.',
+    '1.1': 'Quanto à dinâmica dos fatos, presume-se que o condutor @@ transitava com seu veículo @@, quando atropelou um pedestre/ciclista.',
     '1.2': 'Quanto à dinâmica dos fatos, presume-se que o condutor @@ transitava com seu veículo @@, quando atropelou um animal.',
-    '2.1': 'Quanto à dinâmica dos fatos, presume-se que os condutores @@ transitavam com seus veículos @@ no mesmo sentido, when ocorreu abalroamento longitudinal.',
+    '2.1': 'Quanto à dinâmica dos fatos, presume-se que os condutores @@ transitavam com seus veículos @@ no mesmo sentido, quando ocorreu abalroamento longitudinal.',
     '2.2': 'Quanto à dinâmica dos fatos, presume-se que os condutores @@ transitavam com seus veículos @@ em sentidos opostos, quando ocorreu abalroamento longitudinal.',
     '2.3': 'Quanto à dinâmica dos fatos, presume-se que o condutor @@ transitava com seu veículo @@, quando abalroou transversalmente o veículo @@.',
     '3.1': 'Quanto à dinâmica dos fatos, presume-se que os condutores @@ transitavam com seus veículos @@, quando colidiram frontalmente.',
@@ -65,6 +65,16 @@ function validateStep(step) {
             return false;
         }
     }
+    if (step === 4) {
+        const total = (parseInt(document.getElementById('pmrv_qtd_leve').value) || 0) +
+                      (parseInt(document.getElementById('pmrv_qtd_grave').value) || 0) +
+                      (parseInt(document.getElementById('pmrv_qtd_gravissima').value) || 0);
+        if (total === 0) {
+            alert("Ocorrência com vítima(s): informe a quantidade de vítimas (leve, grave ou óbito).");
+            document.getElementById('pmrv_qtd_leve').focus();
+            return false;
+        }
+    }
     return true;
 }
 
@@ -117,14 +127,14 @@ function updateStepper() {
     dots.forEach(dot => {
         const stepNum = parseInt(dot.getAttribute('data-step'));
         if (stepNum === currentStep) {
-            dot.classList.replace('bg-gray-300', 'bg-pmrv');
-            dot.classList.replace('bg-green-500', 'bg-pmrv');
+            dot.classList.replace('bg-step-idle', 'bg-pmrv');
+            dot.classList.replace('bg-step-done', 'bg-pmrv');
         } else if (stepsMap.indexOf(stepNum) < activeIndex && stepsMap.indexOf(stepNum) !== -1) {
-            dot.classList.replace('bg-gray-300', 'bg-green-500');
-            dot.classList.replace('bg-pmrv', 'bg-green-500');
+            dot.classList.replace('bg-step-idle', 'bg-step-done');
+            dot.classList.replace('bg-pmrv', 'bg-step-done');
         } else {
-            dot.classList.replace('bg-pmrv', 'bg-gray-300');
-            dot.classList.replace('bg-green-500', 'bg-gray-300');
+            dot.classList.replace('bg-pmrv', 'bg-step-idle');
+            dot.classList.replace('bg-step-done', 'bg-step-idle');
         }
     });
 }
@@ -152,7 +162,7 @@ function startVoiceCommandStep1() {
         // Regex para capturar Protocolo (números após a palavra protocolo)
         const protocoloMatch = transcript.match(/protocolo\s*(\d+)/);
         if (protocoloMatch) {
-            document.getElementById('pmrv_sade').value = protocoloMatch[1];
+            document.getElementById('pmrv_sade').value = protocoloMatch[1].substring(0, 9);
         }
 
         // Regex para capturar Viatura (números após a palavra viatura)
@@ -307,6 +317,11 @@ function pmrv_validarKM(input) {
     pmrv_atualizar();
 }
 
+function pmrv_validarSade(input) {
+    input.value = input.value.replace(/\D/g, '').substring(0, 9);
+    pmrv_atualizar();
+}
+
 function pmrv_validarVtr(input) {
     input.value = input.value.replace(/\D/g, '').substring(0, 4);
     localStorage.setItem('PMRV_VTR', input.value);
@@ -314,8 +329,30 @@ function pmrv_validarVtr(input) {
 }
 
 function pmrv_verificarVitimas() {
+    pmrv_ajustarSubtipoPorClassificacao();
     updateStepper();
     pmrv_atualizar();
+}
+
+// Classificação "apenas danos materiais" não admite atropelamento de
+// pedestre/ciclista (1.1): remove a opção e, se estava selecionada, troca para 1.2.
+let pmrvOptAtropRef = null;
+function pmrv_ajustarSubtipoPorClassificacao() {
+    const ehDanos = document.getElementById('pmrv_ocorrencia').value === 'Sinistro de trânsito com danos materiais';
+    const sel = document.getElementById('pmrv_subtipo');
+    const optAtrop = sel.querySelector('option[value="1.1"]');
+    if (optAtrop) pmrvOptAtropRef = optAtrop;
+    if (ehDanos) {
+        const eraSelecionado = sel.value === '1.1';
+        if (optAtrop) optAtrop.remove();
+        if (eraSelecionado) {
+            sel.value = '1.2';
+            pmrv_mudarSubtipo();
+        }
+    } else if (!optAtrop && pmrvOptAtropRef) {
+        const grupo = sel.querySelector('optgroup[label="Atropelamento"]');
+        grupo.insertBefore(pmrvOptAtropRef, grupo.firstElementChild);
+    }
 }
 
 function pmrv_verificarRodovia() {
@@ -367,10 +404,27 @@ function pmrv_toggleSentidoManual() {
     pmrv_atualizar();
 }
 
+// Atropelamento de pedestre/ciclista (1.1) sempre envolve vítima:
+// remove a opção "apenas danos materiais" e força a classificação com vítima(s).
+let pmrvOptDanosRef = null;
+function pmrv_ajustarClassificacaoPorSubtipo(cod) {
+    const sel = document.getElementById('pmrv_ocorrencia');
+    const optDanos = sel.querySelector('option[value="Sinistro de trânsito com danos materiais"]');
+    if (optDanos) pmrvOptDanosRef = optDanos;
+    if (cod === '1.1') {
+        if (optDanos) optDanos.remove();
+        sel.value = 'Sinistro de trânsito com vítima(s)';
+        updateStepper();
+    } else if (!optDanos && pmrvOptDanosRef) {
+        sel.insertBefore(pmrvOptDanosRef, sel.firstElementChild);
+    }
+}
+
 function pmrv_mudarSubtipo() {
     const cod = document.getElementById('pmrv_subtipo').value;
     const objeto = document.getElementById('pmrv_nome_objeto').value || '[OBJETO]';
     const outros = document.getElementById('pmrv_descricao_outros').value || '[OUTROS]';
+    pmrv_ajustarClassificacaoPorSubtipo(cod);
     document.getElementById('pmrv_box_objeto').classList.toggle('hidden', !['4.9', '6.4'].includes(cod));
     document.getElementById('pmrv_box_outros').classList.toggle('hidden', cod !== '7.1');
     let texto = PMRV_DINAMICAS[cod] || '';
@@ -462,6 +516,185 @@ function pmrv_copiarPMSC() {
         console.error('Erro ao copiar: ', err);
         alert("Erro ao copiar. Por favor, selecione o texto e copie manualmente.");
     });
+}
+
+// --- Descrição IA (Gemini) ---
+const PMRV_GEMINI_MODEL = 'gemini-2.5-flash';
+// Chave pessoal embutida (app de uso individual). Pode ser trocada pelo botão 🔑.
+const PMRV_GEMINI_KEY_PADRAO = 'AIzaSyCOc3PAeNTncT7hdSypFS9sxnkTG0BdD7U';
+
+const PMRV_ESTILOS_IA = {
+    juridica: 'JURÍDICO: linguagem formal jurídico-policial, com vocabulário técnico-jurídico adequado a documentos oficiais, descrevendo conduta e nexo causal. Cite dispositivos do Código de Trânsito Brasileiro (CTB) apenas se claramente aplicáveis aos fatos informados.',
+    leiga: 'LEIGO: linguagem simples, clara e direta, sem jargões policiais ou jurídicos, de forma que qualquer cidadão compreenda facilmente o que aconteceu.',
+    tecnica: 'TÉCNICO: terminologia de perícia de trânsito e dinâmica veicular (trajetória, ponto de impacto, perda de aderência, energia cinética), com descrição objetiva e precisa.'
+};
+
+function pmrv_obterChaveIA(forcarNova = false) {
+    let chave = localStorage.getItem('PMRV_GEMINI_KEY') || PMRV_GEMINI_KEY_PADRAO;
+    if (forcarNova) {
+        chave = prompt('Cole sua chave da API do Gemini (gratuita em aistudio.google.com/apikey):', chave || '');
+        if (chave) {
+            chave = chave.trim();
+            localStorage.setItem('PMRV_GEMINI_KEY', chave);
+        }
+    }
+    return chave;
+}
+
+function pmrv_configurarChaveIA() {
+    pmrv_obterChaveIA(true);
+}
+
+function pmrv_montarPromptIA(estilo) {
+    const sel = document.getElementById('pmrv_subtipo');
+    let tipoLabel = sel.options[sel.selectedIndex].text.split(' ').slice(1).join(' ');
+    if (sel.value === '7.1') tipoLabel = document.getElementById('pmrv_descricao_outros').value || 'Outros';
+
+    const ocorr = document.getElementById('pmrv_ocorrencia').value;
+    const rodovia = document.getElementById('pmrv_rodovia').value;
+    const km = document.getElementById('pmrv_km').value || '---';
+    const cidade = document.getElementById('pmrv_cidade').value || '---';
+    const sentido = document.getElementById('pmrv_sentido').value === 'MANUAL' ? document.getElementById('pmrv_sentido_manual').value : document.getElementById('pmrv_sentido').value;
+    const dinamica = document.getElementById('pmrv_dinamica_texto').value || '(sem descrição preenchida)';
+
+    let vitimas = 'sem vítimas (apenas danos materiais)';
+    if (ocorr === 'Sinistro de trânsito com vítima(s)') {
+        const l = parseInt(document.getElementById('pmrv_qtd_leve').value) || 0;
+        const g = parseInt(document.getElementById('pmrv_qtd_grave').value) || 0;
+        const gs = parseInt(document.getElementById('pmrv_qtd_gravissima').value) || 0;
+        const partes = [];
+        if (l > 0) partes.push(`${l} leve(s)`);
+        if (g > 0) partes.push(`${g} grave(s)`);
+        if (gs > 0) partes.push(`${gs} óbito(s)`);
+        vitimas = partes.length > 0 ? partes.join(', ') : 'com vítima(s), quantidades não informadas';
+    }
+
+    return 'Você é um redator de relatórios da Polícia Militar Rodoviária de Santa Catarina.\n' +
+        `Reescreva a descrição da dinâmica do sinistro de trânsito abaixo no estilo ${PMRV_ESTILOS_IA[estilo]}\n\n` +
+        'Dados da ocorrência:\n' +
+        `- Classificação: ${ocorr}\n` +
+        `- Tipo de sinistro: ${tipoLabel}\n` +
+        `- Local: rodovia ${rodovia}, km ${km}, ${cidade}, sentido ${sentido || '---'}\n` +
+        `- Vítimas: ${vitimas}\n` +
+        `- Descrição atual da dinâmica: "${dinamica}"\n\n` +
+        'Regras obrigatórias:\n' +
+        '- Responda APENAS com o parágrafo reescrito, sem título, sem markdown e sem aspas.\n' +
+        '- Um único parágrafo, em português do Brasil.\n' +
+        '- Mantenha o tom presuntivo ("presume-se"), pois a guarnição não presenciou os fatos.\n' +
+        '- Não invente fatos que não estejam nos dados acima. Preserve os marcadores @@ caso existam no texto original.';
+}
+
+async function pmrv_chamarGemini(promptTexto, configExtra = {}) {
+    const chave = pmrv_obterChaveIA();
+    if (!chave) return null;
+
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${PMRV_GEMINI_MODEL}:generateContent?key=${encodeURIComponent(chave)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: promptTexto }] }],
+            generationConfig: Object.assign({ temperature: 0.3 }, configExtra)
+        })
+    });
+
+    if (resp.status === 400 || resp.status === 401 || resp.status === 403) {
+        if (confirm('Chave da API inválida ou sem permissão.\n\nDeseja informar outra chave agora?')) {
+            pmrv_obterChaveIA(true);
+        }
+        return null;
+    }
+    if (resp.status === 429) {
+        alert('Cota da API excedida no momento.\n\nAguarde alguns minutos e tente novamente.');
+        return null;
+    }
+    if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!texto) throw new Error('Resposta vazia da IA');
+    return texto;
+}
+
+async function pmrv_gerarDescricaoIA(estilo) {
+    if (!navigator.onLine) {
+        alert('Sem conexão com a internet.\n\nA Descrição IA precisa de internet. O texto padrão (offline) continua disponível normalmente.');
+        return;
+    }
+
+    const botoes = document.querySelectorAll('.ia-style-btn');
+    const btnAtivo = document.getElementById(`ia-btn-${estilo}`);
+    const rotuloOriginal = btnAtivo.textContent;
+    botoes.forEach(b => b.disabled = true);
+    btnAtivo.textContent = 'Gerando…';
+
+    try {
+        const texto = await pmrv_chamarGemini(pmrv_montarPromptIA(estilo));
+        if (texto) {
+            document.getElementById('pmrv_dinamica_texto').value = texto;
+            pmrv_atualizar();
+        }
+    } catch (err) {
+        console.error('Erro na Descrição IA:', err);
+        alert('Não foi possível gerar a descrição com IA.\n\nVerifique sua conexão e tente novamente.');
+    } finally {
+        botoes.forEach(b => b.disabled = false);
+        btnAtivo.textContent = rotuloOriginal;
+    }
+}
+
+async function pmrv_revisarOrtografiaIA() {
+    if (!navigator.onLine) {
+        alert('Sem conexão com a internet.\n\nA revisão ortográfica com IA precisa de internet.');
+        return;
+    }
+
+    const ta = document.getElementById('pmrv_relatorio_edit');
+    if (!ta.value.trim()) {
+        alert('O relatório está vazio.');
+        return;
+    }
+
+    const btn = document.getElementById('btn-revisar-ia');
+    const rotuloOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Revisando…';
+
+    try {
+        const promptRevisao = 'Você é um revisor de documentos oficiais da Polícia Militar.\n' +
+            'Revise o relatório abaixo corrigindo APENAS erros de ortografia, acentuação, concordância verbal/nominal, regência e pontuação, conforme a norma culta do português do Brasil exigida em documentos oficiais.\n\n' +
+            'Regras obrigatórias:\n' +
+            '- NÃO altere dados: números, protocolo, datas, horas, quilometragem, siglas (SADE, PM, BPMRv, SC-401 etc.) e nomes.\n' +
+            '- NÃO altere a estrutura: mantenha as mesmas linhas, quebras de linha e os asteriscos (*) exatamente onde estão (são marcadores de negrito).\n' +
+            '- NÃO reescreva frases nem mude o estilo do texto; corrija somente o que estiver errado.\n' +
+            '- Responda SOMENTE com JSON válido no formato: {"texto_corrigido": "...", "correcoes": ["descrição curta de cada correção feita"]}\n' +
+            '- Se não houver nenhum erro, devolva o texto original e a lista "correcoes" vazia.\n\n' +
+            'Relatório:\n' + ta.value;
+
+        const respostaJson = await pmrv_chamarGemini(promptRevisao, { temperature: 0, responseMimeType: 'application/json' });
+        if (!respostaJson) return;
+
+        const resultado = JSON.parse(respostaJson);
+        const correcoes = Array.isArray(resultado.correcoes) ? resultado.correcoes : [];
+
+        if (correcoes.length === 0 || !resultado.texto_corrigido) {
+            alert('✓ Revisão concluída: nenhum erro encontrado.');
+            return;
+        }
+
+        const lista = correcoes.map(c => '• ' + c).join('\n');
+        if (confirm(`A IA encontrou ${correcoes.length} correção(ões):\n\n${lista}\n\nAplicar as correções ao relatório?`)) {
+            ta.value = resultado.texto_corrigido;
+            pmrv_syncManualEdit(ta);
+        }
+    } catch (err) {
+        console.error('Erro na revisão ortográfica IA:', err);
+        alert('Não foi possível concluir a revisão com IA.\n\nVerifique sua conexão e tente novamente.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = rotuloOriginal;
+    }
 }
 
 function pmrv_limpar() {
