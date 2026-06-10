@@ -521,7 +521,7 @@ function pmrv_copiarPMSC() {
 // --- Descrição IA (Gemini) ---
 const PMRV_GEMINI_MODEL = 'gemini-2.5-flash';
 // Chave pessoal embutida (app de uso individual). Pode ser trocada pelo botão 🔑.
-const PMRV_GEMINI_KEY_PADRAO = 'AIzaSyCOc3PAeNTncT7hdSypFS9sxnkTG0BdD7U';
+const PMRV_GEMINI_KEY_PADRAO = 'AQ.Ab8RN6Li6VdWmV4HodCkY4xpXr1pvBhRS-egb2qStWDD_V3nDA';
 
 const PMRV_ESTILOS_IA = {
     juridica: 'JURÍDICO: linguagem formal jurídico-policial, com vocabulário técnico-jurídico adequado a documentos oficiais, descrevendo conduta e nexo causal. Cite dispositivos do Código de Trânsito Brasileiro (CTB) apenas se claramente aplicáveis aos fatos informados.',
